@@ -1,6 +1,22 @@
+# version: '3'
+# services:
+#   web:
+#     build: .
+#     ports:
+#     - "8889:8888"
+
+
+
 version: '3'
+
 services:
-  web:
+  webssh-dev:
+    stdin_open: true
+    tty: true
     build: .
+    restart: always
+    container_name: webssh-dev
     ports:
-    - "8888:8888"
+        - "8889:8888"
+
+

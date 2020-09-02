@@ -1,101 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html>
+<head lang="en">
     <meta charset="UTF-8">
-    <title> WebSSH </title>
-    <link href="static/img/favicon.png" rel="icon" type="image/png">
-    <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/xterm.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/fullscreen.min.css" rel="stylesheet" type="text/css"/>
-    <style>
-      .row {
-        margin-top: 15px;
-        margin-bottom: 10px;
-      }
+    <title>webssh</title>
+    <link rel='shortcut icon' type='image/x-icon' href='static/image/favicon.ico'/>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link href="static/css/tooltip.css" rel="stylesheet" type="text/css"/>
+    <link href="static/css/main.css" rel="stylesheet" type="text/css"/>
+</head>
+<header id="head" class="aside">Login SSH</header>
+<body>
+<div id="main" align="center">
+    <form id="form" name="form" class="pure-form pure-form-stacked">
+        <fieldset>
+            <div class="pure-item">
+                <label for="host">Host</label>
+                <input id="host" name="host" type="text" placeholder="Host">
+            </div>
+            <div class="pure-item">
+                <label for="port">Port</label>
+                <input id="port" name="port" type="text" placeholder="Port">
+            </div>
+            <div class="pure-item">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="Username">
+            </div>
+            <div class="pure-item">
+                <label>Type</label>
+                <div id="ratio-group">
+                    <label for="password" class="pure-radio">
+                        <input id="password" type="radio" name="ispwd" value="true" checked>
+                        Password
+                    </label>
 
-      .container {
-        margin-top: 20px;
-      }
-
-      .btn {
-        margin-top: 15px;
-      }
-
-      .btn-danger {
-        margin-left: 5px;
-      }
-      {% if font.family %}
-      @font-face {
-        font-family: '{{ font.family }}';
-        src: url('{{ font.url }}');
-      }
-
-      body {
-        font-family: '{{ font.family }}';
-      }
-      {% end %}
-    </style>
-  </head>
-  <body>
-    <div id="waiter" style="display: none"> Connecting ... </div>
-
-    <div class="container form-container" style="display: none">
-      <form id="connect" action="" method="post" enctype="multipart/form-data"{% if debug %} novalidate{% end %}>
-        <div class="row">
-          <div class="col">
-            <label for="Hostname">Hostname</label>
-            <input class="form-control" type="text" id="hostname" name="hostname" value="" required>
-          </div>
-          <div class="col">
-            <label for="Port">Port</label>
-            <input class="form-control" type="number" id="port" name="port" placeholder="22" value="" min=1 max=65535>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Username</label>
-            <input class="form-control" type="text" id="username" name="username" value="" required>
-          </div>
-          <div class="col">
-            <label for="Password">Password</label>
-            <input class="form-control" type="password" id="password" name="password" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Private Key</label>
-            <input class="form-control" type="file" id="privatekey" name="privatekey" value="">
-          </div>
-          <div class="col">
-            <label for="Passphrase">Passphrase</label>
-            <input class="form-control" type="password" id="passphrase" name="passphrase" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="totp">Totp (time-based one-time password)</label>
-            <input class="form-control" type="password" id="totp" name="totp" value="">
-          </div>
-          <div class="col">
-          </div>
-        </div>
-        <input type="hidden" id="term" name="term" value="xterm-256color">
-        {% module xsrf_form_html() %}
-        <button type="submit" class="btn btn-primary">Connect</button>
-        <button type="reset" class="btn btn-danger">Reset</button>
-      </form>
-    </div>
-
-    <div class="container">
-      <div id="status" style="color: red;"></div>
-      <div id="terminal"></div>
-    </div>
-
-    <script src="static/js/jquery.min.js"></script>
-    <script src="static/js/popper.min.js"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/xterm.min.js"></script>
-    <script src="static/js/xterm-addon-fit.min.js"></script>
-    <script src="static/js/main.js"></script>
-  </body>
+                    <label for="primerykey" class="pure-radio">
+                        <input id="primerykey" type="radio" name="ispwd" value="false">
+                        Primary Key
+                    </label>
+                </div>
+            </div>
+            <div class="pure-item">
+                <label for="secret">Secret</label>
+                <input id="secret" name="secret" type="password"
+                       placeholder="Password or Private Key">
+            </div>
+            <label for="remember" class="pure-checkbox">
+                <input id="remember" type="checkbox"> Remember me
+            </label>
+            <button type="button" class="pure-button pure-button-primary" onclick="connect()">Connect</button>
+        </fieldset>
+    </form>
+</div>
+<div id="term" align="center"></div>
+<script src="http://cdn.bootcss.com/jquery/2.1.2/jquery.min.js"></script>
+<script src="https://rawgit.com/chjj/term.js/master/src/term.js"></script>
+<script src="static/js/ws.js"></script>
+<script src="static/js/formvalid.js"></script>
+<script src="static/js/main.js"></script>
+<script type="application/javascript">
+    $(function () {
+        $("#form").valid([
+            {name: "host", type: "ip"},
+            {name: "port", type: "port"},
+            {name: "username", type: "username"},
+            //{name: "password", type: "password"},
+        ]);
+    })
+</script>
+</body>
 </html>
