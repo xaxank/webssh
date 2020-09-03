@@ -1,12 +1,12 @@
 __author__ = 'xsank'
 
 import logging
-
+import re
 import tornado.websocket
 
 from daemon import Bridge
 from data import ClientData
-from utils import check_ip, check_port
+from utils import check_ip, check_port, validateUser
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -19,6 +19,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def check_origin(self, origin):
         return True
+        # x = re.search("*.zenatix.com", origin)
+        # if x:
+        #     return True
+        # return False
 
     def get_client(self):
         return self.clients.get(self._id(), None)
@@ -35,7 +39,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     @staticmethod
     def _check_init_param(data):
-        return check_ip(data["host"]) and check_port(data["port"])
+        return validateUser(data["jwt"]) and check_ip(data["host"]) and check_port(data["port"])
 
     @staticmethod
     def _is_init_data(data):

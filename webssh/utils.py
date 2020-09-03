@@ -2,7 +2,7 @@ __author__ = 'xsank'
 
 import re
 import sys
-
+import requests
 
 _PLATFORM = sys.platform
 
@@ -19,6 +19,14 @@ def check_port(port):
         return 0 < iport < 65536
     return False
 
+def validateUser(token):
+    if token:
+        auth_response = requests.get('https://wattman.zenatix.com/validate_jwt/?token={}'.format(token))
+        response_dict = auth_response.json()
+        if response_dict.get("user_id") is not None:
+            return True
+        return False
+    return False
 
 class Platform(object):
 

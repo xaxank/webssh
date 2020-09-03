@@ -1,11 +1,3 @@
-# version: '3'
-# services:
-#   web:
-#     build: .
-#     ports:
-#     - "8889:8888"
-
-
 
 version: '3'
 
@@ -13,10 +5,18 @@ services:
   webssh-dev:
     stdin_open: true
     tty: true
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     container_name: webssh-dev
+    working_dir: /root/code/webssh
     ports:
         - "8889:8888"
+    entrypoint:
+        - /bin/bash
+        - -c
+        - python main.py
+
 
 

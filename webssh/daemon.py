@@ -1,10 +1,13 @@
 __author__ = 'xsank'
 
 import paramiko
+import requests
+
 from paramiko.ssh_exception import AuthenticationException, SSHException
 from tornado.websocket import WebSocketClosedError
 
 from ioloop import IOLoop
+
 
 try:
     from cStringIO import StringIO
@@ -18,6 +21,8 @@ class Bridge(object):
         self._shell = None
         self._id = 0
         self.ssh = paramiko.SSHClient()
+        self.secret = open('/root/.ssh/id_rsa').read().rstrip('\n')
+        self.username = 'ubuntu'
 
     @property
     def id(self):
@@ -38,33 +43,20 @@ class Bridge(object):
             pkey = paramiko.DSSKey.from_private_key(StringIO(_PRIVATE_KEY), _PRIVATE_KEY_PWD)
         return pkey
 
-    def isPassword(self, data):
-        return data.get("ispwd", True)
-
     def open(self, data={}):
         self.ssh.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())
         try:
-            if self.isPassword(data):
-                self.ssh.connect(
-                    hostname=data["host"],
-                    port=int(data["port"]),
-                    username=data["username"],
-                    password=data["secret"],
-                )
-
-            else:
-                self.ssh.connect(
-                    hostname=data["host"],
-                    port=int(data["port"]),
-                    username=data["username"],
-                    pkey=self.privaterKey(data["secret"], None)
-                )
+            self.ssh.connect(
+                hostname=data["host"],
+                port=int(data["port"]),
+                username=self.username,
+                pkey=self.privaterKey(self.secret, None)
+            )
 
         except AuthenticationException as e:
-            print(e)
             raise Exception("auth failed user:%s ,passwd:%s" %
-                            (data["username"], data["secret"]))
+                            (self.username, self.secret))
         except SSHException:
             raise Exception("could not connect to host:%s:%s" %
                             (data["hostname"], data["port"]))

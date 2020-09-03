@@ -41,17 +41,14 @@ FROM python:2.7.10-slim
 
 RUN apt-get update && \
     apt-get dist-upgrade --yes && \
-	apt-get install -y openconnect openvpn openssh-server && mkdir ${HOME}/.ssh && \
-	apt-get autoremove -y && apt-get clean -y && \
-	pip install --upgrade pip && \
+    apt-get install -y openconnect openvpn openssh-server && mkdir ${HOME}/.ssh && \
+    apt-get autoremove -y && apt-get clean -y && \
+    pip install --upgrade pip && \
     rm -rf /var/lib/apt/lists/*
 
+ADD requirements.txt /root/requirements.txt
+RUN pip install --no-cache-dir -r /root/requirements.txt
 
-ADD . /code
-WORKDIR /code
+ADD . /root/code
 
-RUN pip install -r requirements.txt
-
-RUN ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
-
-CMD ["python", "webssh/main.py"]
+RUN ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa && chmod 744 ~/.ssh
